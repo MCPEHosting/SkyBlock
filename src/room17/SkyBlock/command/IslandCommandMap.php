@@ -13,6 +13,9 @@ namespace room17\SkyBlock\command;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
+use pocketmine\permission\DefaultPermissions;
+use pocketmine\permission\Permission;
+use pocketmine\permission\PermissionManager;
 use pocketmine\player\Player;
 use pocketmine\plugin\Plugin;
 use pocketmine\plugin\PluginOwned;
@@ -121,6 +124,15 @@ class IslandCommandMap extends Command implements PluginOwned {
         $this->registerCommand(new CategoryCommand());
         $this->registerCommand(new BlocksCommand());
         $this->registerCommand(new CooperateCommand($this));
+    }
+
+    public function registerPermissions(): void {
+        $user = PermissionManager::getInstance()->getPermission(DefaultPermissions::ROOT_USER);
+        if ($user !== null) {
+            foreach ($this->plugin->getGeneratorManager()->getGenerators() as $generator){
+                DefaultPermissions::registerPermission(new Permission("skyblock.island.{$generator}"), [$user]);
+            }
+        }
     }
 
     public function execute(CommandSender $sender, string $commandLabel, array $args): void {

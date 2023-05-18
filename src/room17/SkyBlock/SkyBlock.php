@@ -55,6 +55,7 @@ class SkyBlock extends PluginBase {
         $this->messageManager = new MessageManager($this);
         $this->commandMap = new IslandCommandMap($this);
         $this->commandMap->registerDefaultCommands();
+        $this->commandMap->registerPermissions();
     }
 
     public function onDisable(): void {
