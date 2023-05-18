@@ -11,9 +11,16 @@ declare(strict_types=1);
 namespace room17\SkyBlock\utils;
 
 
+use JetBrains\PhpStorm\Pure;
+use pocketmine\block\Block;
+use pocketmine\block\RuntimeBlockStateRegistry;
 use pocketmine\item\Item;
-use pocketmine\item\ItemFactory;
+use pocketmine\item\StringToItemParser;
+use pocketmine\nbt\BigEndianNbtSerializer;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\utils\TextFormat;
+use pocketmine\world\format\io\GlobalBlockStateHandlers;
+use pocketmine\world\format\io\GlobalItemDataHandlers;
 
 class Utils {
 
@@ -25,7 +32,10 @@ class Utils {
 
     public static function parseItem(string $item): ?Item {
         $parts = array_map("intval", explode(",", str_replace(" ", "", $item)));
-        return (count($parts) > 0) ? ItemFactory::getInstance()->get($parts[0], $parts[1] ?? 0, $parts[2] ?? 1) : null;
+        $parts0 =  $parts[0];
+        $parts1 = $parts[1] ?? 0;
+        $parts2 = $parts[2] ?? 1;
+        return (count($parts) > 0) ? self::decodeItem("{$parts0}:{$parts1}:{$parts2}") /*ItemFactory::getInstance()->get($parts[0], $parts[1] ?? 0, $parts[2] ?? 1)*/ : null;
     }
 
     public static function translateColors(string $message): string {
@@ -55,4 +65,43 @@ class Utils {
         return $message;
     }
 
+    #[Pure]
+    public static function encodeBlock(Block $block): string{
+        return $block->getName();
+    }
+
+    public static function decodeBlock(string $object): Block{
+        $ex = explode(";", $object);
+        if (!isset($ex[1]) && !is_int($ex[0])) { // PM5-format
+            $item = StringToItemParser::getInstance()->parse($object);
+            $block = null;
+            if ($item !== null) $block = $item->getBlock();
+            else throw new \RuntimeException("Block $object not found in StringToItemParser, may its not registered there?");
+            return $block;
+        } else { // PM4-format
+            if (!is_int($ex[1])) $ex[1] = 0;
+            return RuntimeBlockStateRegistry::getInstance()->fromStateId(GlobalBlockStateHandlers::getDeserializer()->deserialize(GlobalBlockStateHandlers::getUpgrader()->upgradeIntIdMeta((int)$ex[0] ?? 1, (int)$ex[1] ?? 0)));
+        }
+    }
+
+    public static function encodeItem(Item $item): string{
+        return implode(";", [$item->getName(), $item->getCount()]);
+    }
+
+    public static function decodeItem(string $object): Item{
+        $ex = explode(";", $object);
+        if (isset($ex[0]) && !is_int($ex[0])) { // PM5-format
+            if (!isset($ex[1]) || !is_int($ex[1])) $ex[1] = 1;
+            $item = StringToItemParser::getInstance()->parse($object);
+            if ($item === null) throw new \RuntimeException("Item $object not found in StringToItemParser, may its not registered there?");
+            $item->setCount($ex[1]);
+            return $item;
+        } else { // PM4-format
+            $id = $ex[0] ?? 0;
+            $meta = isset($ex[2]) ? $ex[1] ?? 0 : 0;
+            $count = isset($ex[2]) ? $ex[2] ?? $ex[1] ?? 1 : 1;
+            $nbt = (new BigEndianNbtSerializer())->read($ex[3])->mustGetCompoundTag() ?? CompoundTag::create();
+            return GlobalItemDataHandlers::getDeserializer()->deserializeStack(GlobalItemDataHandlers::getUpgrader()->upgradeItemTypeDataInt($id, $meta, $count, $nbt));
+        }
+    }
 }

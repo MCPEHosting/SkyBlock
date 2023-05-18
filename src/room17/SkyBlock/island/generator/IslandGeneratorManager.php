@@ -59,13 +59,12 @@ class IslandGeneratorManager {
     }
 
     public function registerGenerator(string $name, string $class): void {
-        $generator = strtolower($name);
-        GeneratorManager::getInstance()->addGenerator($class, $generator, fn() => null, true);
-        if(isset($this->generators[$generator])) {
-            $this->plugin->getLogger()->debug("Overwriting generator: $generator");
+        GeneratorManager::getInstance()->addGenerator($class, $name, fn() => null, true);
+        if(isset($this->generators[$name])) {
+            $this->plugin->getLogger()->debug("Overwriting generator: $name");
         }
-        $this->generators[$generator] = $class;
-        $this->registerGeneratorPermission($generator);
+        $this->generators[$name] = $class;
+        $this->registerGeneratorPermission($name);
     }
 
     private function registerGeneratorPermission(string $name): void {

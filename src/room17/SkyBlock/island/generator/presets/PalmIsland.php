@@ -39,7 +39,7 @@ class PalmIsland extends IslandGenerator {
             $world->setBlockAt(10, 39, 9, VanillaBlocks::SAND());
             $world->setBlockAt(9, 39, 9, VanillaBlocks::END_STONE_BRICKS());
             $world->setBlockAt(10, 39, 10, VanillaBlocks::SAND());
-            $world->setBlockAt(9, 39, 10, VanillaBlocks::GOLD());
+            $world->setBlockAt(9, 39, 10, BlockLegacyIds::GOLD_BLOCK);
             $world->setBlockAt(9, 39, 11, VanillaBlocks::SAND());
             $world->setBlockAt(8, 39, 10, VanillaBlocks::SAND());
             $world->setBlockAt(8, 39, 9, VanillaBlocks::SAND());

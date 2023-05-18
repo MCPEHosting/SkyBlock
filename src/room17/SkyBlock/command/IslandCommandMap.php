@@ -61,7 +61,7 @@ class IslandCommandMap extends Command implements PluginOwned {
     }
 
     /**
-     * @return SkyBlock|Plugin
+     * @return Plugin
      */
     public function getPlugin(): Plugin {
         return $this->plugin;
