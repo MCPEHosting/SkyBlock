@@ -11,20 +11,34 @@ declare(strict_types=1);
 namespace room17\SkyBlock\utils;
 
 
+use JetBrains\PhpStorm\Pure;
+use pocketmine\block\Block;
+use pocketmine\block\RuntimeBlockStateRegistry;
 use pocketmine\item\Item;
+use pocketmine\item\LegacyStringToItemParser;
+use pocketmine\item\StringToItemParser;
+use pocketmine\nbt\BigEndianNbtSerializer;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\utils\TextFormat;
+use pocketmine\world\format\io\GlobalBlockStateHandlers;
+use pocketmine\world\format\io\GlobalItemDataHandlers;
 
 class Utils {
 
     public static function parseItems(array $items): array {
-        return array_filter(array_map("self::parseItem", $items), function($value) {
+        return array_filter(array_map([self::class, 'parseItem'], $items), function($value) {
             return $value != null;
         });
     }
 
     public static function parseItem(string $item): ?Item {
         $parts = array_map("intval", explode(",", str_replace(" ", "", $item)));
-        return (count($parts) > 0) ? Item::get($parts[0], $parts[1] ?? 0, $parts[2] ?? 1) : null;
+        $parts0 =  $parts[0];
+        $parts1 = $parts[1] ?? 0;
+        $parts2 = $parts[2] ?? 1;
+        $string = "{$parts0}:{$parts1}";
+        $item = StringToItemParser::getInstance()->parse($string) ?? LegacyStringToItemParser::getInstance()->parse($string);
+        return (count($parts) > 0) ? $item->setCount($parts2) : null;
     }
 
     public static function translateColors(string $message): string {
@@ -53,5 +67,4 @@ class Utils {
         $message = str_replace("{RESET}", TextFormat::RESET, $message);
         return $message;
     }
-
 }
