@@ -12,19 +12,21 @@ declare(strict_types=1);
 namespace room17\SkyBlock\island;
 
 
+use pocketmine\block\VanillaBlocks;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\BlockFormEvent;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Cancellable;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\server\CommandEvent;
 use pocketmine\event\world\ChunkLoadEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerBedEnterEvent;
 use pocketmine\event\player\PlayerChatEvent;
-use pocketmine\event\player\PlayerCommandPreprocessEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerQuitEvent;
+use pocketmine\player\chat\LegacyRawChatFormatter;
 use pocketmine\player\Player;
 use pocketmine\block\tile\Chest;
 use room17\SkyBlock\island\generator\IslandGenerator;
@@ -76,7 +78,7 @@ class IslandListener implements Listener {
             return;
         }
         $this->checkPermissionToInteract($island, $session, $event);
-        if(!$event->isCancelled() and $event->getBlock()->isSolid()) {
+        if(!$event->isCancelled() and $event->getBlockAgainst()->isSolid()) {
             $island->addBlock();
         }
     }
@@ -126,14 +128,14 @@ class IslandListener implements Listener {
         $chatFormat = str_replace("{username}", $session->getName(), $chatFormat);
         $chatFormat = str_replace("{message}", $event->getMessage(), $chatFormat);
         $chatFormat = Utils::translateColors($chatFormat);
-        $event->setFormat($chatFormat);
+        $event->setFormatter(new LegacyRawChatFormatter($chatFormat));
         $event->setRecipients($session->getIsland()->getChattingPlayers());
     }
 
     /**
      * Prevent players from sending blocked commands inside islands
      */
-    public function onCommand(PlayerCommandPreprocessEvent $event): void {
+    public function onCommand(PlayerChatEvent $event): void {
         $session = SessionLocator::getSession($event->getPlayer());
         $message = $event->getMessage();
         if($session->getIslandByWorld() == null or $message[0] != "/") {
