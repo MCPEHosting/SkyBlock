@@ -82,15 +82,17 @@ class Island {
         $sessions = [];
         foreach($this->members as $member) {
             $session = $member->getOnlineSession();
-            if($session != null) {
-                $sessions[] = $session;
+            if($session != null && $session->getPlayer() instanceof Player) {
+                if ($session->getPlayer()->isOnline() && !$session->getPlayer()->isClosed() && $session->getPlayer()->isConnected()) {
+                    $sessions[] = $session;
+                }
             }
         }
         return $sessions;
     }
 
     /**
-     * Returns the sessions of the players that are in the private island's chat
+     * Returns the sessions of the players that are on the private island's chat
      *
      * @return Player[]
      */
@@ -264,7 +266,7 @@ class Island {
 
     public function tryToClose(): void {
         $this->updateMembers();
-        if(!$this->closed and empty($this->getPlayersOnline()) and empty($this->getSessionsOnline())) {
+        if(!$this->closed && count($this->getPlayersOnline()) <= 0 && count($this->getSessionsOnline()) <= 0) {
             $this->closed = true;
             $this->manager->closeIsland($this);
         }

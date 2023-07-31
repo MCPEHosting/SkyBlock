@@ -10,7 +10,6 @@ declare(strict_types=1);
 
 namespace room17\SkyBlock\island\generator\presets;
 
-
 use pocketmine\block\VanillaBlocks;
 use pocketmine\math\Vector3;
 use pocketmine\world\ChunkManager;
