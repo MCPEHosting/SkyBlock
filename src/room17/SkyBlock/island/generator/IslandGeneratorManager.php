@@ -25,7 +25,7 @@ class IslandGeneratorManager {
 
     private SkyBlock $plugin;
 
-    /** @var IslandGenerator[]|string[] */
+    /** @var IslandGenerator[] */
     private array $generators = [];
 
     /**
@@ -48,9 +48,9 @@ class IslandGeneratorManager {
 
     /**
      * @param string $name
-     * @return null|string|IslandGenerator
+     * @return IslandGenerator|null
      */
-    public function getGenerator(string $name): ?string {
+    public function getGenerator(string $name): ?IslandGenerator {
         return $this->generators[strtolower($name)] ?? null;
     }
 
