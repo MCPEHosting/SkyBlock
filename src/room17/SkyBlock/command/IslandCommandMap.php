@@ -13,9 +13,12 @@ namespace room17\SkyBlock\command;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\command\PluginIdentifiableCommand;
-use pocketmine\Player;
+use pocketmine\permission\DefaultPermissions;
+use pocketmine\permission\Permission;
+use pocketmine\permission\PermissionManager;
+use pocketmine\player\Player;
 use pocketmine\plugin\Plugin;
+use pocketmine\plugin\PluginOwned;
 use room17\SkyBlock\command\presets\AcceptCommand;
 use room17\SkyBlock\command\presets\BlocksCommand;
 use room17\SkyBlock\command\presets\CategoryCommand;
@@ -41,13 +44,12 @@ use room17\SkyBlock\session\SessionLocator;
 use room17\SkyBlock\SkyBlock;
 use room17\SkyBlock\utils\message\MessageContainer;
 
-class IslandCommandMap extends Command implements PluginIdentifiableCommand {
+class IslandCommandMap extends Command implements PluginOwned {
 
-    /** @var SkyBlock */
-    private $plugin;
+    private SkyBlock $plugin;
 
     /** @var IslandCommand[] */
-    private $commands = [];
+    private array $commands = [];
 
     public function __construct(SkyBlock $plugin) {
         $this->plugin = $plugin;
@@ -58,13 +60,18 @@ class IslandCommandMap extends Command implements PluginIdentifiableCommand {
             "sb",
             "skyblock"
         ]);
+        $this->setPermission("command.is");
         $plugin->getServer()->getCommandMap()->register("skyblock", $this);
     }
 
     /**
-     * @return SkyBlock|Plugin
+     * @return Plugin
      */
     public function getPlugin(): Plugin {
+        return $this->plugin;
+    }
+
+    public function getOwningPlugin(): Plugin {
         return $this->plugin;
     }
 
@@ -118,6 +125,15 @@ class IslandCommandMap extends Command implements PluginIdentifiableCommand {
         $this->registerCommand(new CategoryCommand());
         $this->registerCommand(new BlocksCommand());
         $this->registerCommand(new CooperateCommand($this));
+    }
+
+    public function registerPermissions(): void {
+        $user = PermissionManager::getInstance()->getPermission(DefaultPermissions::ROOT_USER);
+        if ($user !== null) {
+            foreach ($this->plugin->getGeneratorManager()->getGenerators() as $generator){
+                DefaultPermissions::registerPermission(new Permission("skyblock.island.{$generator}"), [$user]);
+            }
+        }
     }
 
     public function execute(CommandSender $sender, string $commandLabel, array $args): void {

@@ -3,10 +3,12 @@ description: A powerful core for SkyBlock servers
 author: GiantQuartz
 website: twitter.com/GiantQuartz
 main: room17\SkyBlock\SkyBlock
-version: 3.0.1
-api: 3.0.0
+version: 3.0.3
+api: 5.0.0
 
 permissions:
   skyblock.interaction:
     description: Allows players to interact with an island regardless of whether they belong to it
     default: op
+  command.is:
+    default: true
