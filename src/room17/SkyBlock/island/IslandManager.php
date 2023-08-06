@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace room17\SkyBlock\island;
 
 
+use pocketmine\Server;
 use pocketmine\world\World;
 use room17\SkyBlock\event\island\IslandOpenEvent;
 use room17\SkyBlock\event\island\IslandCloseEvent;
@@ -52,12 +53,21 @@ class IslandManager {
         (new IslandOpenEvent($this->islands[$identifier]))->call();
     }
 
-    public function closeIsland(Island $island): void {
+    public function closeIsland(Island $island, bool $delete = false): void {
         $island->save();
         $server = $this->plugin->getServer();
         (new IslandCloseEvent($island))->call();
         $server->getWorldManager()->unloadWorld($island->getWorld());
+
+        if ($delete){
+            $this->deleteIsland($island);
+        }
+
         unset($this->islands[$island->getIdentifier()]);
     }
 
+    public function deleteIsland(Island $island): void{
+        @unlink($this->plugin->getDataFolder() . "isles/{$island->getIdentifier()}.json");
+        @rmdir(Server::getInstance()->getDataPath() . "worlds/" . $island->getIdentifier());
+    }
 }

@@ -80,7 +80,7 @@ class IslandFactory {
         }
         $island->setMembers([]);
         $island->save();
-        SkyBlock::getInstance()->getIslandManager()->closeIsland($island);
+        SkyBlock::getInstance()->getIslandManager()->closeIsland($island, true);
         (new IslandDisbandEvent($island))->call();
     }
 

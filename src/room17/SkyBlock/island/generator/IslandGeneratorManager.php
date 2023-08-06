@@ -48,9 +48,9 @@ class IslandGeneratorManager {
 
     /**
      * @param string $name
-     * @return IslandGenerator|null
+     * @return string|IslandGenerator|null
      */
-    public function getGenerator(string $name): ?IslandGenerator {
+    public function getGenerator(string $name): string|IslandGenerator|null {
         return $this->generators[strtolower($name)] ?? null;
     }
 
